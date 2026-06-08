@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOMETASK</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #fef9e0;
+            padding: 20px;
+        }
+        .player-container {
+            background: #ffeb99;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 650px;
+            border: 1px solid #f7d44a;
+        }
+        .current-track {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .cover {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 3px solid #f7b32b;
+            background: #ffe6b3;
+        }
+        .track-info {
+            flex: 1;
+        }
+        .track-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #b85c00;
+            margin: 0 0 6px 0;
+        }
+        .track-artist {
+            font-size: 15px;
+            color: #b87333;
+            margin: 0 0 12px 0;
+        }
+        audio {
+            width: 100%;
+            margin-top: 8px;
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #ffd966;
+        }
+        .playlist {
+            margin-top: 20px;
+            border-top: 1px solid #f7d44a;
+            padding-top: 15px;
+        }
+        .playlist-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #c47a2a;
+            margin-bottom: 12px;
+        }
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .track-item {
+            background: #fff2cc;
+            border-radius: 60px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #f7d44a;
+        }
+        .track-item:hover {
+            background: #ffe0a3;
+            transform: translateX(5px);
+        }
+        .track-item.active {
+            background: #ffd966;
+            border-color: #e69500;
+        }
+        .track-item img {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid #f7b32b;
+        }
+        .track-item-info {
+            flex: 1;
+        }
+        .track-item-title {
+            font-weight: 600;
+            color: #b85c00;
+            font-size: 15px;
+        }
+        .track-item-artist {
+            font-size: 12px;
+            color: #b87333;
+        }
+        .play-icon {
+            font-size: 22px;
+            color: #e69500;
+        }
+        @media (max-width: 550px) {
+            .player-container { width: 100%; padding: 16px; }
+            .current-track { flex-direction: column; text-align: center; }
+            .cover { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+<div class="player-container">
+    <div class="current-track">
+        <img class="cover" id="main-cover" src="1.jpg" alt="обложка">
+        <div class="track-info">
+            <div class="track-title" id="main-title">3.05</div>
+            <div class="track-artist" id="main-artist">audio 3.05</div>
+            <audio id="audio-player" controls>
+                <source src="" type="audio/mpeg">
+            </audio>
+        </div>
+    </div>
+    <div class="playlist">
+        <div class="playlist-title">🎵 choose audio</div>
+        <div class="track-list" id="track-list"></div>
+    </div>
+</div>
+
+<script>
+    // ========== ТРЕКИ С НАЗВАНИЯМИ 3.05, 3.06, 3.07, 3.08 ==========
+    const tracks = [
+        {
+            src: "SO3_A1_WB_3C_Audio_3_05.mp3",
+            title: "3.05",
+            artist: "audio 3.05",
+            cover: "1.jpg"
+        },
+        {
+            src: "SO3_A1_WB_3C_Audio_3_06.mp3",
+            title: "3.06",
+            artist: "audio 3.06",
+            cover: "2.jpg"
+        },
+        {
+            src: "SO3_A1_WB_3C_Audio_3_07.mp3",
+            title: "3.07",
+            artist: "audio 3.07",
+            cover: "3.jpg"
+        },
+        {
+            src: "SO3_A1_WB_3C_Audio_3_08.mp3",
+            title: "3.08",
+            artist: "audio 3.08",
+            cover: "4.jpg"
+        }
+    ];
+
+    let currentTrackIndex = 0;
+    const audio = document.getElementById('audio-player');
+    const mainCover = document.getElementById('main-cover');
+    const mainTitle = document.getElementById('main-title');
+    const mainArtist = document.getElementById('main-artist');
+    const trackListDiv = document.getElementById('track-list');
+
+    function loadTrack(index) {
+        if (index < 0 || index >= tracks.length) return;
+        currentTrackIndex = index;
+        const track = tracks[index];
+        mainCover.src = track.cover;
+        mainTitle.textContent = track.title;
+        mainArtist.textContent = track.artist;
+        audio.querySelector('source').src = track.src;
+        audio.load();
+        renderTrackList();
+    }
+
+    function renderTrackList() {
+        trackListDiv.innerHTML = '';
+        tracks.forEach((track, idx) => {
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track-item';
+            if (idx === currentTrackIndex) trackDiv.classList.add('active');
+            trackDiv.innerHTML = `
+                <img src="${track.cover}" alt="cover">
+                <div class="track-item-info">
+                    <div class="track-item-title">${track.title}</div>
+                    <div class="track-item-artist">${track.artist}</div>
+                </div>
+                <div class="play-icon">▶</div>
+            `;
+            trackDiv.addEventListener('click', () => {
+                loadTrack(idx);
+                setTimeout(() => audio.play().catch(e => console.log("autoplay blocked")), 100);
+            });
+            trackListDiv.appendChild(trackDiv);
+        });
+    }
+
+    if (tracks.length > 0) loadTrack(0);
+</script>
+</body>
+</html>
